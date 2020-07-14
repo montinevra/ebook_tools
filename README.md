@@ -1,6 +1,19 @@
 # ebook_tools
 A collection of scripts for converting digital scans to ebooks
 
+## nav_pagelist.py
+Generates a pagelist section for the nav.xhtml in an epub.
+
+Requires EbookLib.
+
+	pip3 install EbookLib
+
+Usage: 
+
+	python3 nav_pagelist.py [ebook]
+
+where `ebook` is a `.epub` file. Then copy/paste the output into your nav.xhtml
+
 ## ocr_batch.py
 Batch ocr processing via https://www.onlineocr.net/.
 
