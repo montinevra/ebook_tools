@@ -1,6 +1,23 @@
 # ebook_tools
 A collection of scripts for converting digital scans to ebooks
 
+## html_from_docx.py
+Converts all numbered .docx files (e.g. "page001.docx", page002.docx") in a directory to html. Strips all formatting. This does *not* create a valid .html file, just some code that you can copy/paste into your epub editor.
+
+Requires python-docx.
+
+	pip3 install python-docx
+
+Usage:
+
+	python3 html_from_docs.py [src_dir]
+
+Uses the current directory if none is specified.
+
+Outputs directly to the shell. Redirect it if you want to save to a file.
+
+	python3 html_from_docs.py [src_dir] > some_file
+
 ## nav_pagelist.py
 Generates a pagelist section for the nav.xhtml in an epub.
 
