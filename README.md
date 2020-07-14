@@ -10,7 +10,7 @@ Requires EbookLib.
 
 Usage: 
 
-	python3 nav_pagelist.py [ebook]
+	python3 nav_pagelist.py ebook
 
 where `ebook` is a `.epub` file. Then copy/paste the output into your nav.xhtml
 
