@@ -19,78 +19,100 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-g_download_dir = "~/Downloads"
-g_download_limit = 15
-g_downloads = 0
-g_input_dir = os.getcwd()
-g_input_list = os.listdir(g_input_dir)
-g_scan_list = []
-g_ocr_list = []
-g_output = {
-	"extension": [".docx", ".xlsx", ".txt"],
-	"menu_value": ["Microsoft Word (docx)", "Microsoft Excel (xlsx)", "Text Plain (txt)"]
-}
-class FormatIndex(Enum):
-	DOCX = 0
-	XLSX = 1
-	TXT = 2
-g_args = {
-	"docx": FormatIndex.DOCX,
-	".docx": FormatIndex.DOCX,
-	"word": FormatIndex.DOCX,
-	"xlsx": FormatIndex.XLSX,
-	".xlsx": FormatIndex.XLSX,
-	"excel": FormatIndex.XLSX,
-	"txt": FormatIndex.TXT,
-	".txt": FormatIndex.TXT,
-	"plaintext": FormatIndex.TXT,
-}
-g_format_index = FormatIndex.DOCX.value
 
-def input_format_is_valid():
-	message_box = g_driver.find_element_by_id("message")
+def input_format_is_valid(t_driver, t_convert_btn):
+	message_box = t_driver.find_element_by_id("message")
 
 	time.sleep(.5)
-	while not g_convert_btn.is_enabled():
+	while not t_convert_btn.is_enabled():
 		if message_box.text == "Filetype not allowed":
 			return False
 		time.sleep(.5)
 	return True
 
-if len(sys.argv) >= 2:
-	try:
-		g_format_index = g_args[sys.argv[1].lower()].value
-	except:
-		print("'", sys.argv[1], "' is not a valid output format. Choose 'docx', 'xlsx', or 'txt' instead. Defaulting to 'docx'...")
-for i in range(len(g_input_list)):
-	g_ocr_list.append(os.path.join(expanduser(g_download_dir), os.path.splitext(g_input_list[i])[0] + g_output["extension"][g_format_index]))
-	g_scan_list.append(os.path.join(g_input_dir, g_input_list[i]))
-g_driver = webdriver.Chrome()
-g_driver.get("https://www.onlineocr.net/")
-for i in range(len(g_scan_list)):
-	if os.path.exists(g_ocr_list[i]):
-		print(g_ocr_list[i] + " exists. Skipping...")
-		continue
-	if g_downloads >= g_download_limit:
-		print("Download limit reached. Please wait an hour before ocr-ing additional files.")
-		break
-		# g_driver.delete_all_cookies()
-		# g_driver.refresh()
-		# g_downloads = 0
-	print("ocr-ing " + g_scan_list[i] + "...")
-	format_menu = Select(g_driver.find_element_by_id("MainContent_comboOutput"))
-	format_menu.select_by_value(g_output["menu_value"][g_format_index])
-	upload_btn = g_driver.find_element_by_id("fileupload")
-	upload_btn.send_keys(g_scan_list[i])
-	g_convert_btn = g_driver.find_element_by_id("MainContent_btnOCRConvert")
-	if not input_format_is_valid():
-		print("    Invalid file format. Skipping...")
-		continue
-	g_convert_btn.click()
-	time.sleep(.5)
-	download_link = WebDriverWait(g_driver, 30).until(EC.element_to_be_clickable((By.ID, "MainContent_lnkBtnDownloadOutput")))
-	download_link.click()
-	while not os.path.exists(g_ocr_list[i]):
+
+def get_src_dir():
+	if len(sys.argv) >= 2:
+		for i in range(1, min([len(sys.argv), 3])):
+			if os.path.isdir(sys.argv[i]):
+				return sys.argv.pop(i)
+	print("No directory specified. Using current directory...")
+	return os.getcwd()
+
+
+def get_format():
+	class Format(Enum):
+		DOCX = 0
+		XLSX = 1
+		TXT = 2
+
+	format_args = {
+		"docx": Format.DOCX,
+		".docx": Format.DOCX,
+		"word": Format.DOCX,
+		"xlsx": Format.XLSX,
+		".xlsx": Format.XLSX,
+		"excel": Format.XLSX,
+		"txt": Format.TXT,
+		".txt": Format.TXT,
+		"plaintext": Format.TXT,
+	}
+
+	if len(sys.argv) >= 2:
+		for i in range(1, min([len(sys.argv), 3])):
+			if sys.argv[i].lower() in format_args:
+				return format_args[sys.argv[i].lower()].value
+	print("No format specified. Using docx...")
+	return Format.DOCX.value
+
+
+def main():
+	DOWLOAD_DIR = "~/Downloads"
+	DOWNLOAD_LIMIT = 15
+	downloads = 0
+	src_dir = get_src_dir()
+	input_list = os.listdir(src_dir)
+	scan_list = []
+	ocr_list = []
+	output_format = get_format()
+	output_value = {
+		"extension": (".docx", ".xlsx", ".txt"),
+		"menu": ("Microsoft Word (docx)", "Microsoft Excel (xlsx)", "Text Plain (txt)")
+	}
+
+	for i in range(len(input_list)):
+		ocr_list.append(os.path.join(expanduser(DOWLOAD_DIR), os.path.splitext(input_list[i])[0] + output_value["extension"][output_format]))
+		scan_list.append(os.path.join(src_dir, input_list[i]))
+	driver = webdriver.Chrome()
+	driver.get("https://www.onlineocr.net/")
+	for i in range(len(scan_list)):
+		if os.path.exists(ocr_list[i]):
+			print(ocr_list[i] + " exists. Skipping...")
+			continue
+		if downloads >= DOWNLOAD_LIMIT:
+			print("Download limit reached. Please wait an hour before ocr-ing additional files.")
+			break
+			# driver.delete_all_cookies()
+			# driver.refresh()
+			# downloads = 0
+		print("ocr-ing " + scan_list[i] + "...")
+		format_menu = Select(driver.find_element_by_id("MainContent_comboOutput"))
+		format_menu.select_by_value(output_value["menu"][output_format])
+		upload_btn = driver.find_element_by_id("fileupload")
+		upload_btn.send_keys(scan_list[i])
+		convert_btn = driver.find_element_by_id("MainContent_btnOCRConvert")
+		if not input_format_is_valid(driver, convert_btn):
+			print("\tInvalid file format. Skipping...")
+			continue
+		convert_btn.click()
 		time.sleep(.5)
-	g_downloads += 1
-g_driver.quit()
+		download_link = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.ID, "MainContent_lnkBtnDownloadOutput")))
+		download_link.click()
+		while not os.path.exists(ocr_list[i]):
+			time.sleep(.5)
+		downloads += 1
+	driver.quit()
+
+
+if __name__ == "__main__":
+	main()

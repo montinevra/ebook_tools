@@ -34,15 +34,25 @@ where `ebook` is a `.epub` file. Then copy/paste the output into your nav.xhtml
 ## ocr_batch.py
 Batch ocr processing via https://www.onlineocr.net/.
 
-Requires Selenium.
+### Requirements 
+#### Selenium
 
     pip3 install selenium    
 
-Put all of the images you want to run ocr on into some directory, then `cd` into it. Then
+#### chromedriver
+Install it from your package manager, or manually: https://chromedriver.chromium.org/getting-started
 
-    python3 ocr_upload.py [format]
-    
-where `format` is one of `txt`, `docx`, or `xlsx`. Defaults to `docx` with no arguments.
+#### Google Chrome
+
+https://www.google.com/chrome/
+
+### Usage
+Put all of the images you want to run ocr on into some directory. Then
+
+    python3 ocr_upload.py [src_dir] [format]
+
+`src_dir` should be some directory with ocr-able images. Uses the current directory if omitted.
+`format` is one of `txt`, `docx`, or `xlsx`. Defaults to `docx`.
 
 Ocr'ed files will be downloaded to `~/Downloads`.
 
