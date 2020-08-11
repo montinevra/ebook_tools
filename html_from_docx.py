@@ -7,9 +7,9 @@
 # https://github.com/montinevra/ebook_tools
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-import sys
-import os
-import re
+import sys as Sys
+import os as OS
+import re as Re
 from docx import Document
 from docx.document import Document as _Document
 from docx.oxml.table import CT_Tbl
@@ -53,31 +53,34 @@ def print_block_items(t_parent, t_page_num):
 
 
 def get_src_dir():
-	if len(sys.argv) >= 2:
-		if not os.path.isdir(sys.argv[1]):
-			print(sys.argv[1], "is not a valid directory.")
-			sys.exit()
-		return sys.argv[1]
+	if len(Sys.argv) >= 2:
+		if not OS.path.isdir(Sys.argv[1]):
+			print(Sys.argv[1], "is not a valid directory.")
+			Sys.exit()
+		return Sys.argv[1]
 	else:
-		return os.getcwd()
+		return OS.getcwd()
 
 
 def main():
 	page_num = None
 	src_dir = get_src_dir()
-	docx_list = os.listdir(src_dir)
+	docx_list = OS.listdir(src_dir)
 	last_char = "."
 
-	os.chdir(src_dir)
+	OS.chdir(src_dir)
 	for input_file in docx_list:
 		try:
 			document = Document(input_file)
-			file_name = os.path.splitext(input_file)[0]
-			nums_in_filename = re.findall("[0-9]+", file_name)
-			page_num = re.findall("[1-9]+[0-9]*", file_name)[-1]
+			file_name = OS.path.splitext(input_file)[0]
+			nums_in_filename = Re.findall("[0-9]+", file_name)
+			if len(nums_in_filename) == 1 and nums_in_filename[0] == "000":
+				page_num = "0"
+			else:
+				page_num = Re.findall("[1-9]+[0-9]*", file_name)[-1]
 		except:
 			continue
-		if nums_in_filename[0] == "000":
+		if len(nums_in_filename) > 1 and nums_in_filename[0] == "000":
 			page_num = roman_from_int(int(page_num)).lower()
 		if (last_char == "."):
 			tag = "div"
