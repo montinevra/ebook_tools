@@ -67,6 +67,7 @@ def main():
 	src_dir = get_src_dir()
 	docx_list = OS.listdir(src_dir)
 	last_char = "."
+	last_page = None
 
 	OS.chdir(src_dir)
 	for input_file in docx_list:
@@ -86,8 +87,12 @@ def main():
 			tag = "div"
 		else:
 			tag = "span"
+		while last_page != None and last_page.isnumeric() and int(last_page) + 1 < int(page_num):
+			last_page = str(int(last_page) + 1)
+			print('<' + tag + ' title="' + last_page + '" id="p' + last_page + '" epub:type="pagebreak"></' + tag + '>')
 		print('<' + tag + ' title="' + page_num + '" id="p' + page_num + '" epub:type="pagebreak"></' + tag + '>')
 		last_char = print_block_items(document, page_num)
+		last_page = page_num
 
 
 if __name__ == "__main__":
