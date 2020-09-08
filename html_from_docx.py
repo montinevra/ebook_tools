@@ -83,7 +83,7 @@ def main():
 			continue
 		if len(nums_in_filename) > 1 and nums_in_filename[0] == "000":
 			page_num = roman_from_int(int(page_num)).lower()
-		if (last_char == "."):
+		if (last_char == "." or last_char == "?" or last_char == "!"):
 			tag = "div"
 		else:
 			tag = "span"
